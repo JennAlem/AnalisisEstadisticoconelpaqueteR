@@ -1,0 +1,260 @@
+---
+documentclass: article
+lang: es
+header-includes:
+
+- \usepackage{graphicx}
+- \usepackage{amsmath}
+- \usepackage{xcolor}
+- \usepackage{geometry}
+- \usepackage[utf8]{inputenc}
+- \usepackage{fancyheadings}
+- \pagestyle{fancy}
+- \usepackage{amssymb}
+- \usepackage{amsfonts}
+- \usepackage{setspace}
+#- \usepackage[spanish]{babel}
+- \usepackage{float}
+- \lhead{\scriptsize Analisis  de datos}
+- \chead{}
+- \rhead{\scriptsize \leftmark}
+- \lfoot{\textit{Análisis Estadístico con el paquete R}}
+- \rfoot{\thepage}
+#title: "Untitled"
+format: pdf
+editor: visual
+---
+
+```{=tex}
+\newpage
+\begin{titlepage}
+
+\centering
+{\bfseries\LARGE UNIVERSIDAD DE EL SALVADOR}\\ 
+\vspace{0.5cm}
+{\bfseries\LARGE FACULTAD MULDISCIPLINARIA DE \par OCCIDENTE }\\
+\vspace{0.5cm}
+{\bfseries\LARGE DEPARTAMENTO DE MATEM\'ATICA\par}
+\vspace{0.5cm}
+{\bfseries\LARGE LICENCIATURA EN ESTAD\'ISTICA\par}
+\vspace{0.5cm}
+{\includegraphics[width=3cm]{D:/Beatriz/Ciclo II 2023/Analisis Estadistico con el Paquete R/Practica 1 - Restaurante_files/miner.png}\par}
+\vspace{0.6cm}
+{\bfseries\LARGE PRACTICAS REALIZADAS EN EL SOFTWARE PYTHON \par}
+\vspace{0.5cm}
+{\bfseries\LARGE DOCENTE: \par}
+{\bfseries\LARGE LICENCIADO. 
+Luis Ernesto Aquino Salazar \par}
+\vspace{0.6cm}
+{\bfseries\LARGE PRESENTADO POR: \par}
+{\bfseries\LARGE Jenniffer Beatriz Alem\'an Castillo \par}
+\vfill
+{\bfseries\Large   \par}
+\thispagestyle{empty}
+\end{titlepage}
+\thispagestyle{empty}
+\newpage
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+
+
+
+\section*{\centering\Huge\textbf{Práctica de Restaurante}}
+\addcontentsline{toc}{section}{Práctica de Restaurante}
+
+
+\subsection*{\textbf{Exploración de la base de datos}}
+\addcontentsline{toc}{subsection}{Exploración de la base de datos}
+
+
+
+
+El objetivo de esta práctica es descubrir el porqué de las disminuciones de las ventas del restaurante y así poder ayudar al dueño a encontrar las soluciones adecuadas a dicho problema, para esto se debe comenzar con la revisión de los datos que tiene la base, las columnas y el número de filas de esta. Para esto se seguirán los siguientes pasos:
+
+1. Carga de librerías que se utilizaran
+2. Carga de la base
+3. Exploración básica de la base de datos
+4. Creación de 5 gráficos
+
+
+
+
+```
+
+```{r}
+# Carga de las librerías que se utilizaran
+
+library(ggplot2)
+library(readxl)
+library(dplyr)
+
+```
+
+
+```{r}
+
+
+Restaurante <- read_excel("D:/Beatriz/Ciclo II 2023/Analisis Estadistico con el Paquete R/Practica 1 - Restaurante_files/Restaurante, Power BI, Datos.xlsx")
+
+# Nombre de las columnas/variabes
+colnames(Restaurante)
+
+#Número de filas y columnas
+dim(Restaurante)
+
+#Visualización de los primeros 10 datos de la base
+head(Restaurante)
+
+```
+
+Ahora se procede a obtener gráficos estadístico de la base de datos que ayudaran a entender el comportamiento de los datos:
+
+Margen de beneficio = (Precio de venta - Costo del producto) / Precio de venta x 100
+
+
+```{r}
+
+
+
+# Agregar una columna de margen de beneficio a la base de datos Restaurante
+Restaurante <- Restaurante %>% mutate(margen_beneficio = (Precio - Costo) / Precio * 100)
+
+
+# Crear un nuevo dataframe con el margen de beneficio promedio por categoría
+margen_promedio <- Restaurante %>% group_by(Categoria) %>% summarize(margen_beneficio_promedio = mean(margen_beneficio))
+
+# Ordenar el dataframe por margen de beneficio promedio
+margen_promedio <- margen_promedio[order(margen_promedio$margen_beneficio_promedio),]
+
+# Crear el gráfico de barras con el eje y contado de 5 en 5
+graf_margen <- ggplot(data = margen_promedio, aes(x = Categoria, y = margen_beneficio_promedio)) + 
+  geom_bar(stat = "identity", fill = "#003E74", col="black") +
+  coord_flip() +
+  labs(title = "Margen de beneficio promedio por categoría", x = "Categoría", y = "Margen de beneficio promedio") +
+  scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 5))
+
+# Mostrar el gráfico
+graf_margen
+
+```
+
+
+```{=tex}
+
+
+
+El grafico anteriro los margenes de beneficios que se obtienen en promedio por cada categoría, se puede apreciar que las entradas son la catgoría que menos magenes de benefico obtiene y que los vinos son los que obtiene un mayor beneficio.
+
+
+Ahora se procederá a realizar un grafico para conocer cual es la situación del restaurante con respecto a la clientela de este:
+
+
+```
+
+
+```{r}
+
+# Crear un nuevo dataframe con las ventas por tipo de cliente
+ventas_tipo_cliente <- Restaurante %>% group_by(`Tipo de Cliente`) %>% summarize(ventas = sum(Precio))
+
+# Ordenar el dataframe por ventas
+ventas_tipo_cliente <- ventas_tipo_cliente[order(ventas_tipo_cliente$ventas),]
+
+# Crear el gráfico de barras
+graf_ventas <- ggplot(data = ventas_tipo_cliente, aes(x = `Tipo de Cliente`, y = ventas)) + 
+  geom_bar(stat = "identity", fill = "#003E74", col="black") +
+  coord_flip() +
+  labs(title = "Ventas por tipo de cliente", x = "Tipo de cliente", y = "Ventas")
+
+# Mostrar el gráfico
+graf_ventas
+
+```
+
+
+
+```{=tex}
+
+
+En el gráfico anterior se puede apreciar que hay muchos más clientes nuevos que clientes repetidos, esto puede llegar a resultar en que los clientes nuevos que van llegando no disfrutaron del servicio por lo que deciden no regresar o por alguna situación similar deciden no volver, esto puede ser una de las razones donde el dueño del restaurante debe enfocarse para poder resolver el problema de disminución en las ventas del restaurante
+
+Ahora se procederá a realizar un gráfico para conocer las propinas que los clientes dejan con respecto a la persona que les atendió, si bien esto no es una razón para asegurar que la persona que atendió es buena o mala en su trabajo esto puede ayudar a saber si podría ser un factor para la disminución de ventas.
+
+
+```
+
+
+```{r}
+
+# Crear el gráfico de dispersión
+graf_propina <- ggplot(data = Restaurante, aes(x = Atendió, y = Propina)) + 
+  geom_point() +
+  labs(title = "Relación entre las personas que atendieron y la propina", x = "Persona que atendió", y = "Propina")
+
+# Mostrar el gráfico
+graf_propina
+```
+
+
+```{=tex}
+
+El gráfico anterior muestra que, si todos han recibido propinas de diferente porcentaje, no se observa nada en específico, excepto en Mauricio que todas sus propinas fueron del 20%, esto puede significar que todos los clientes que fueron atendidos por el se llevaron una muy buena impresión del personal y del restaurante. 
+
+Además de estos análisis también se debe conocer que comportamiento tienen las ventas del restaurante por mes, para esto se tomó en cuenta el precio que los clientes pagaron, sin tomar en cuenta las propinas:
+
+```
+
+
+```{r}
+
+# Crear un nuevo dataframe con las ventas por mes
+ventas_mes <- Restaurante %>% mutate(Mes = format(as.Date(Fecha), "%m-%Y"), Año = format(as.Date(Fecha), "%Y")) %>% group_by(Mes, Año) %>% summarize(ventas = sum(Precio))
+
+# Filtrar los datos por los años 2014 y 2015
+ventas_mes <- ventas_mes[ventas_mes$Año %in% c("2014", "2015"),]
+
+# Crear el gráfico de líneas
+graf_ventas <- ggplot(data = ventas_mes, aes(x = Mes, y = ventas, color = Año, group = Año)) + 
+  geom_line() +
+  labs(title = "Ventas por mes", x = "Mes", y = "Ventas") +
+  scale_x_discrete(labels = c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"))
+
+# Mostrar el gráfico
+graf_ventas
+
+
+
+```
+
+
+```{=tex}
+
+En el gráfico anterior se puede observar como se tuvieron mayores ventas en el mes de abril y que a partir de ese mes las ventas comenzaron a disminuir. El año de 2015 no se observa dado que solo se tienen datos del primer mes del año.
+También es importante tener en cuenta el margen de beneficios que se han tenido por mes:
+
+
+```
+
+
+```{r}
+# Crear un nuevo dataframe con el margen de beneficio por mes
+beneficio_mes <- Restaurante %>% mutate(Mes = format(as.Date(Fecha), "%m-%Y"), Año = format(as.Date(Fecha), "%Y")) %>% group_by(Mes, Año) %>% summarize(beneficio = sum(margen_beneficio))
+
+# Filtrar los datos por los años 2014 y 2015
+beneficio_mes <- beneficio_mes[beneficio_mes$Año %in% c("2014", "2015"),]
+
+# Crear el gráfico de líneas
+graf_beneficio <- ggplot(data = beneficio_mes, aes(x = Mes, y = beneficio, color = Año, group = Año)) + 
+  geom_line() +
+  labs(title = "Margen de beneficio por mes", x = "Mes", y = "Margen de beneficio") +
+  scale_x_discrete(labels = c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"))
+
+# Mostrar el gráfico
+graf_beneficio
+
+```
+
