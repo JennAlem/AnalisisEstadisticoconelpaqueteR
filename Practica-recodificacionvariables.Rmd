@@ -1,0 +1,115 @@
+---
+title: "Practica - Recodificacion variables"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-08-28"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Activar el directorio de trabajo:
+
+```{r}
+getwd()
+```
+
+```{r}
+setwd("D:/Beatriz/Ciclo II 2023/Analisis Estadistico con el Paquete R/PracticaRecodificacionVariables")
+```
+
+
+Recupera desde el archivo la hoja de datos
+
+
+```{r}
+library(readxl)
+
+Densidad_Poblacional = read_excel("Densidad_Poblacional.xlsx", 
+    sheet = "Municipios",skip=8)
+
+
+Densidad_Poblacional
+```
+
+
+Cargar el paquete car:
+
+```{r}
+library(carData)
+library(car)
+```
+
+Recodificar variable:
+
+```{r}
+Densidad_Poblacional$MUNIC = recode(Densidad_Poblacional$MUNICIPIO,
+ "1:13='Ahuachapan';14:27='Santa Ana';
+ 28:44='Sonsonate';45:78='Chalatenango';
+ 79:101='La Libertad';102:121='San Sanvador';
+ 122:138='Cuscatlan';139:161='La Paz';
+ 162:171='Caba~nas';172:185='San Vicente';
+ 186:197='Usulutan';198:218='San Miguel';
+ 219:245='Morazan';246:264='La Unión'")
+
+names(Densidad_Poblacional)
+
+```
+
+Cambio de nombre a la tercera columna:
+
+```{r}
+names(Densidad_Poblacional)[3]<-'Pob_Total'
+print(head(Densidad_Poblacional))
+
+```
+
+
+Ahora se pasa a factor la variable "MUNIC" :
+
+```{r}
+Densidad_Poblacional$MUNIC = as.factor(Densidad_Poblacional$MUNIC)
+levels(Densidad_Poblacional$MUNIC)
+
+```
+
+
+## CALCULO DE NUEVAS VARIABLES
+
+Ahora se calculará la densidad poblacional de cada uno de los municipios, para esto se creará la nueva variable llamada Densidad:
+
+```{r}
+Densidad_Poblacional$Densidad=Densidad_Poblacional$Pob_Total/
++ Densidad_Poblacional$AREA
+Densidad_Poblacional$Densidad
+
+```
+
+
+Ahora se calculará el indice de masculinidad en cada uno de los municipios, el cual se define como el numero de hombres entre el numero de mujeres (multilicada por 100 para mejores interpretaciones).
+
+Para esto se creará la nueva variable llamada IND.MASCULINIDAD:
+
+```{r}
+Densidad_Poblacional$IND.MASCULINIDAD=Densidad_Poblacional$HOMBRES/
++ Densidad_Poblacional$MUJERES*100
+
+Densidad_Poblacional$IND.MASCULINIDAD
+```
+
+
+```{r}
+print(head(Densidad_Poblacional))
+```
+
+
+```{r}
+names(Densidad_Poblacional)
+```
+
+
+
+
+
+
