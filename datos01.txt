@@ -1,0 +1,5 @@
+Edad Estatura Peso Sexo
+26 1.65 146 F
+21 1.73 158 M
+21 1.81 167 M
+20 1.70 152 F
