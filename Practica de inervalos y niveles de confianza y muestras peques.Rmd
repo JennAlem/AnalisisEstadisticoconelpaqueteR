@@ -1,0 +1,190 @@
+---
+title: "Intervalos de confianza"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-09-25"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+n = 50
+media <- 32
+desv <- 6
+nc <- 0.9 #Nivel de confianza
+errorest <- desv/sqrt(n)
+margenerror <- 1.644854 * errorest #valor de Z para un nivel de confianza de 0.9
+margenerror
+
+
+int_sup <- media + margenerror
+int_inf <- media - margenerror
+
+int_inf
+int_sup
+```
+
+
+Función ZSUM.test
+
+Librerias que necesita:
+
+```{r}
+library(BSDA)
+library(lattice)
+```
+
+Código de la función:
+
+```{r}
+zsum.test(mean.x=32, sigma.x=6, n.x = 50, conf.level=0.90)
+```
+
+Esto realiza una prueba de hipotesis, verifica si la media no es igual a 0.
+EL Z significa:
+
+el valor del estadístico de prueba Z es 37.712, lo que indica que la media muestral es 37.712 veces la desviación estándar de la media muestral por encima de la media poblacional hipotética.
+
+Se rechaza la hipoesis de media = 0, la media se encuentra entre [30.6043, 33.3957]. Esto no incluye el 0.
+
+Esta función es para relizar una prueba de hipotesis y como extra da un intervalo de confianza.
+------------------------------------------------------------------------
+
+#           DOS MEDIAS
+
+
+Ahora se quiere comparar el intervalo de confianza de 2 medias:
+
+
+La diferencia de dos medias esta entre 1 y 4, significa que la diferencia entre las medias de dos grupos es mayor que 1 y menor que 4.
+
+codigo para esto:
+
+```{r}
+zsum.test(mean.x=81, sigma.x=5.2, n.x=25, 
+          mean.y = 76, sigma.y = 3.4, n.y = 36, conf.level = 0.99)
+```
+
+El nivel de confianza se elige de acuerdo al conocimento que se tiene de los efectos aleatorios. Algo que si o si va a segir su conportamiento, se le puede dar un 0.99 de confianza, pero si es un experimento que puede tener mucha variabilidad, como la opinón publica se le da un 0.95 porque puede estar sujeto a factores aleatorios.
+
+----------------------------------------------------------------------
+
+
+## Ejercicio:
+
+Se tiene una muesta de 35 estudiantes y se quiere estimar la calificación. Con base a la experiencia se conoce que la desviación tipica es de 2.01. el promedio de las notas de los 35 estudiantes es de 4.9.
+
+Construya 3 intervalos de confianza, uno de 90, otro de 95 y por ultimo uno de 99% de confinza.
+
+### Solución:
+
+
+Intervalo de confianza para un nivel de confianza de 0.90.
+
+```{r}
+zsum.test(mean.x = 4.9, sigma.x = 2.01, n.x = 35, conf.level=0.90)
+```
+
+
+Intervalo de confianza para un nivel de confianza de 0.95.
+
+```{r}
+zsum.test(mean.x = 4.9, sigma.x = 2.01, n.x = 35, conf.level=0.95)
+```
+
+Intervalo de confianza para un nivel de confianza de 0.99.
+
+```{r}
+zsum.test(mean.x = 4.9, sigma.x = 2.01, n.x = 35, conf.level=0.90)
+```
+
+
+##                          Grados de Libertad
+
+Los grados de libertad son N-1 y significan que se tienen N-1 valores en los que se permite variación. Es decir si se tiene n=25 y se tienen gl=24, esto significa que la media puede variar 24 unidades.
+
+
+
+##         Muestras pequeñas, desviación tipica desconocida (S)
+
+### ¿Qué es cusidesviación?
+
+
+```{r}
+qt(0.05, 9)
+```
+
+grafico:
+
+```{r}
+# Graficar la distribución t con 9 grados de libertad
+curve(dt(x, df = 9), from = -4, to = 4, xlab = "Valor t", ylab = "Densidad", main = "Distribución t con 9 grados de libertad")
+
+# Agregar una línea vertical en el valor de qt(0.05, 9)
+abline(v = qt(0.05, 9), col = "red")
+```
+
+
+# Debate:
+
+##         F es Fisher 
+
+F = 
+
+que mide la grafica F de Fisher, que es, que significa?
+¿Son frecuencias? o que son?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
