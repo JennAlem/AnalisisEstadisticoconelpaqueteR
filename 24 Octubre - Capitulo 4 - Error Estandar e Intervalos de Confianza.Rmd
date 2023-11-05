@@ -1,0 +1,253 @@
+---
+title: "24 Octubre - Capítulo 4: Error Estándar e Intervalos de Confianza"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-10-24"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Tarea:** Investigar la distribución triangular
+
+## 2 Intervalo de confianza para la media. 
+
+Población total:
+miu +- Z deviación
+
+Por lo tanto, sise puede calcular un intervalo para una población completa, no solo para la muestra.
+
+
+```{r}
+poblacion <- round(runif(400000, 5, 90), 0)
+poblacion
+```
+
+## Obtener muestra
+
+```{r}
+muestra<- sample(poblacion,size=20,replace=FALSE) 
+mean(muestra) 
+```
+
+
+```{r}
+muestra2<- sample(poblacion,size=20,replace=FALSE) 
+mean(muestra2) 
+```
+
+
+
+```{r}
+muestra3<- sample(poblacion,size=20,replace=FALSE) 
+mean(muestra3)
+```
+
+
+## Extraer las muestras con un ciclo for
+
+```{r}
+n <- 100 
+media_muestral <- matrix(0, n,1) 
+for (i in 1:n) { 
+  media_muestral[i,1]=mean(sample(poblacion,size=20,replace=FALSE)) 
+  } 
+
+```
+
+```{r}
+mean(poblacion)
+mean(media_muestral)
+```
+
+
+## Histograma
+
+
+```{r}
+hist(media_muestral, main="Histograma de la media muestral", n=30) 
+```
+
+
+## 2.1 Caso 1: Si NO conocemos la varianza o desviación estándar de la población 
+Cuando la población tiende a infinito la distribución t tiende a la normal, por eso en R solo se usa la t.
+
+```{r}
+t.test(muestra2, conf.level =.90)[["conf.int"]] 
+```
+
+## 2.2 Caso 2: Si conocemos la varianza o la desviación estándar de la población 
+
+
+```{r}
+ic_media_var_pob <- function(y, sigma, nc, variable) 
+{ 
+  z <- qnorm(nc+(1-nc)/2) 
+  n <- length(y) 
+  i_sup <- mean(y)+z*sigma/sqrt(n) 
+  i_inf <- mean(y)-z*sigma/sqrt(n)
+  texto <- sprintf("Estamos %s%% seguros que el promedio de %s está entre %.2f y %.2f.", (nc*100), variable, i_inf, i_sup) 
+  return(list(texto)) 
+} 
+```
+
+```{r}
+sigma= 24.55
+ic_media_var_pob(muestra2,sigma,.95,"edad") 
+```
+
+
+# 3 Intervalo de confianza para las diferencias de medias 
+
+### Base de datos
+
+```{r}
+library(readxl) 
+setwd("C:/Users/MINEDUCYT/Downloads") 
+enoe <- read_xlsx("enoe.xlsx") 
+```
+
+## 3.1 Caso 1: Si NO se conoce la varianza o desviación estándar de las poblaciones 
+
+```{r}
+library(dplyr) 
+hombres <- subset(enoe, sex=="Hombre") 
+hombres<-hombres$ingreso_mensual 
+mujeres <- subset(enoe, sex=="Mujer") 
+mujeres <- mujeres$ingreso_mensual 
+```
+
+## intervalo de confianza cuando no conocemos la varianza de la población
+
+```{r}
+ic_dosmedias_nvp <- function(x,y,var_ig, nc, variable) 
+{ 
+  t <- t.test(x, y, var.equal = var_ig, conf.level = nc)[["conf.int"]] 
+i_inf <- t[1] 
+i_sup <- t[2] 
+texto <- sprintf("Estamos %s%% seguros que la diferencia del %s promedio entre ambas muestras está entre %.2f y %.2f.", 
+                 (nc*100), variable, i_inf, i_sup) 
+
+resumen <- sprintf("%s%% IC: %.2f a %.2f", 
+                   (nc*100), i_inf, i_sup) 
+return(list(texto, resumen)) 
+}
+```
+
+
+• Si la varianza entre ambas muestras es la misma usamos var_ig=TRUE. Observa que en este caso el comando consume las muestras y pregunta si consideramos que las muestras tienen la misma varianza o no. Si es la misma usamos 
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=TRUE, nc=.95, variable="salario")[[1]] 
+```
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=TRUE, nc=.95, variable="salario")[[2]] 
+```
+
+• Si la varianza entre ambas muestras es diferente usamos var_ig=FALSE 
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=FALSE, nc=.95, variable="salario")[[1]] 
+```
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=FALSE, nc=.95, variable="salario")[[2]] 
+```
+
+En la práctica será mucho más común que las varianzas sean diferentes, sin embargo es necesario establecer que puede darse el caso en que son iguales. 
+
+```{r}
+var(hombres) 
+```
+
+```{r}
+var(mujeres) 
+```
+
+
+# Tarea
+
+**Que hace el codigo de la pagina 9 y de donde ha salido**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

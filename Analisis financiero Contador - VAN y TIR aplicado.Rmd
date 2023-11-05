@@ -1,0 +1,225 @@
+---
+title: "Continuación de VAN y TIR - Martes 17 de octubre de 2023"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-10-17"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Facha "2023-10-17"
+
+# Estados Financieros
+
+## Activos, Pasivos, Capital
+
+Los pasivos es lo que debo y el capital es lo que tengo.
+
+Ejemplo, en una persona tiene activos (zapatos, reloj, etc.) y tiene 0 capital y todo lo que tiene lo debe, o sea que serían los pasios.
+
+Acitvos = Pasivos + Capital
+
+## Estado de resultados
+
+
+Ingresos de Operaciones (ventas)  -
+Costo de lo vendido               -
+Gasto de Venta                    -
+Resultado Neto                    =
+
+
+
+## Ejemplo: Negocio desde cero (Clínica dermatologica)
+
+Flujo de Operaciones
+       +
+FLujo de Inversiones
+       +
+Flujo de Financiamiento
+       =
+Cambio de Efectivo
+
+
+
+EL pasivo circulante es a corto plazo y el no ciculante es a largo plazo.
+
+Pasivo ciculante es el que a mes se deben pagar. el no circulate es como un prestamo que te hace tu máma.
+
+
+10000
+
+
+## Fecha "2023-10-23"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

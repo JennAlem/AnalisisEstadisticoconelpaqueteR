@@ -1,0 +1,106 @@
+---
+title: "Continuación de VAN y TIR"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-10-23"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+sumar todos los pagos por días y sumar todos los gastos por días.
+Lo interesate es el SALDO DISPONIBLE (Flujo 1 "F1").
+
+Para una empresa se deben hacer proyecciones con los datos que ya sucedieron.
+
+F1 = 317.4
+f2 = 1459
+F3 = 0
+2334.79
+F4 = 875
+F5 = 174 y credito de 1000 
+F6 = 1932
+F7 = 928.20
+
+0 = -5000
+1 = 317.4
+2 = 1459
+3 = 2334.79
+
+
+```{r}
+flujos_caja <- c(317.4, 1459, 2334.79)
+tasa_descuento <- 0.05
+vna <- sum(flujos_caja/(1+tasa_descuento)^seq_along(flujos_caja))
+vna
+```
+
+
+```{r}
+flujos_caja <- c(2500, 2000, 1500)
+
+tasa_descuento <- 0.05
+vna <- sum(flujos_caja/(1+tasa_descuento)^seq_along(flujos_caja))
+vna
+```
+
+
+al 5%
+2500, 2000, 1500
+VAN es 5490
+
+
+
+sql  #" $ es de visual veisi
+
+where transacciones_contables.fecha_transaccion < #" $ Format("yyyy-mm-dd") & "# AND transacciones_contables.tipo_transaccion = 'Ingreso'
+
+
+# *QUE ES UN TIGER EN SQL?*
+
+
+```{r}
+cuota = 1836
+interes = 0.16
+
+
+resultado = cuota / (1+interes)
+resultado
+```
+
+pagos_cuotas / 1 + tasa
+
+
+#----------------------------------------------------------------
+
+
+# COdigo del VAN y TIR del Lic. Aquino
+
+Es para simular el VAN y TIR despues:
+
+VAN y TIR deterministico
+
+Tarea: Simular los flujos de efectivos
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
