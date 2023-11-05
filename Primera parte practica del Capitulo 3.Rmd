@@ -1,0 +1,198 @@
+---
+title: "Capitulo 3"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-10-16"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Aleatoriedad y estrategias de muestreo 
+
+### Lanzamiento de un dado
+
+Un dado tiene 6 caras, se debe simular el lanzamiento del dado y obtenerel resultado de dicho lanzamiento:
+
+```{r}
+sample(c(1,2,3,4,5,6),1) 
+```
+
+
+Si este dado es lanzado muchas veces se obtiene lo siguiente:
+
+```{r}
+dados <- sample(c(1,2,3,4,5,6),1000000, replace=TRUE) 
+#Resumir los resultados de los lanzamientos
+table(dados) 
+```
+
+
+### Lanzamiento de una moneda
+
+Si se lanza una moneda se tiene una probabildiad de que salga cara o cruz es de 0.50, pero si se lanza muchas veces ¿se obtendría lo mismo?, la simulación de este experimento es el siguiente:
+
+```{r}
+moneda <- sample(c("Cara", "Cruz"), 1000000, replace=TRUE)
+#Resumir los resultados de los lanzamientos
+table(moneda) 
+```
+
+Se puede observar que entre mas veces se lleva a cabo el experimento de lanzar la moneda, mas cercano es que del total de veces, la mitad sea cara y la otra mitad sea cruz. Los eventos aleatorios son individualmente impredecibles, pero en el largo de muchos lanzamientos, podemos estar muy seguros de que obtendremos por resultado cara (o cruz) la mitad del tiempo. La ley de los grandes números (LGN) indica que cuando observamos todos los resultados de una gran cantidad de pruebas, los resultados convergen a un valor esperado, incluso cuando los resultados individuales son aleatorios. 
+
+## 2. Muestreo aleatorio simple  
+
+En un muestreo aleatorio simple, cada individuo o elemento de la población tiene la misma probabilidad de ser elegido parte de la muestra. Es la forma más sencilla de muestreo y consiste en asignar un número a cada elemento de la población y a través de un generador de números aleatorios seleccionar el tamaño de muestra que se necesita. 
+
+```{r}
+library(readr)
+hogares <- read_csv("D:/Beatriz/Ciclo II 2023/Analisis Estadistico con el Paquete R/Practica Capitulo 3/hogares_enigh.csv")
+head(hogares)
+```
+
+Usando el comando sample, podemos seleccionar de forma aletoria simple 10 viviendas.
+
+```{r}
+sample(hogares$folioviv,10) 
+```
+
+
+
+
+
+# Parentesis despues de la práctica del CAPITULO 3
+
+# VAN y TIR
+
+
+## VAN
+
+Formula para un solo día:
+
+VAN = R_t / (1+i)^t
+
+donde:
+
+VAN: Valor actual neto
+R_t: flujo de caja
+t: tiempo
+i: tasa de descuento
+
+Ejemplo:
+Si tengo $10,000 dolares para invertir. Decido invertir en algún negocio. Cuanto tengo que generar para lograr ms ganancias y devolver la tasa de descuento?
+
+
+
+
+## *Investigar: Análisis estadístico financiero *
+
+## Simulación del VAN
+
+Formula para muchos días:
+
+Van = -A + (Q_1 / (1 + i)^1) + (Q_2 / (1 + i)^2) + (Q_3 / (1 + i)^3) + ... + (Q_n / (1 + i)^n)
+
+## *Investigar: Qué es el interes compuesto*
+
+Van = -20000 + (5000/(1+0.05)^1) 
+
+```{r}
+Van1 = -20000 + (5000/(1 + 0.05)^1) + (8000/( 1 + 0.05)^2) + (10000/(1+0.05)^3)
+Van1
+```
+
+*Nota:* Si el VAN es positivo esta bien, ya que le quedo dinero, es decir ganancias.
+
+```{r}
+Van2 = -20000 + (6000/(1 + 0.05)^1) + (8000/( 1 + 0.05)^2) + (10000/(1+0.05)^3)
+Van2
+```
+
+
+```{r}
+Van2 - Van1
+```
+
+
+## *Investigar el cambio de dienro en el tiempo*
+
+```{r}
+Van3 = -20000 + (5000/(1 + 0.05)^1) + (8000/( 1 + 0.05)^2) + (11000/(1+0.05)^3)
+Van3
+```
+
+
+```{r}
+Van3 - Van1
+```
+
+
+Si se vende mas al principio y todo se mantiene igual el van queda en 656.52 dolares pero si se vende más al final queda 863.83 dolares.
+
+La TIR es una tasa cuyo objetivo es que el VAN de cero o sea "i".
+
+```{r}
+i <- 
+o = -2000 + (5000/1+i) + (8000 / (1 + i)^2) + (10000 / (1 + i)^3)
+  
+```
+
+Para una i = 0.06
+
+
+```{r}
+i <- 0.06
+o1 = -20000 + (5000/1+i) + (8000 / (1 + i)^2) + (10000 / (1 + i)^3)
+o1
+  
+```
+
+
+```{r}
+o1 - Van1
+```
+
+```{r}
+i = 0.0065
+o2 = -20000 + (5000/1+i) + (8000 / (1 + i)^2) + (10000 / (1 + i)^3)
+o2
+  
+```
+
+```{r}
+o2 - Van1
+```
+
+Mis resultados estan erroneos
+
+
+#---------------------------------------
+
+## En la realidad es de la siguiente forma:
+
+
+o1 = -20000 + (aleatorio / 1+i ) + ( aleatorio / (1 + i )^2 ) + ( aleatorio / (1 + i )^3 )
+ para esto se debe calcular 1000 veces el VAN
+ 
+## *Investigar: Teorema del limite central*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
