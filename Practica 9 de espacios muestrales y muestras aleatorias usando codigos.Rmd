@@ -1,0 +1,161 @@
+---
+title: "Practica 9 de espacios muestrales y muestras aleatorias"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-09-19"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Espacios Muestrales Y Muestras Aleatorias
+
+Función que genere una muestra: sample
+sample( x, size, replace = FALSE, prob = NULL )
+
+## Caso 1: Lanzamiento de moneda
+
+Vector del que se tomara la muestra:
+
+```{r}
+moneda <- c("cara", "corona")
+n <- 10 
+# COn remplazo
+lanzamiento <- sample(moneda, n, replace = T) # Todos tienen la misma prob de ser seleccionada
+lanzamiento
+```
+
+## Caso 2: 
+
+Generar un espacio de 1 a 54:
+
+```{r}
+espacio <- 1:54
+n = 6
+
+per0 <- sample(espacio, n)
+per0
+
+#Con remplazo
+per1 <- sample(espacio, n, replace = T)
+per1
+
+# Sin remplazo
+
+per2 <- sample(espacio, n, replace = F)
+per2
+```
+
+
+## Caso 3: lanzamiento de dados
+
+Simular 4 lanzamientos de 2 dados
+
+```{r}
+espacios <- as.vector(outer(1:6, 1:6, paste))
+espacios
+```
+
+muestra:
+
+```{r}
+n = 5
+muestra <- sample(espacios, n, replace = T)
+muestra
+```
+
+## Caso 4: Cartas
+
+Se tienen 52 cartas hay 4 grupos (de 13 cada uno). Cada grupo tiene la misma númeración
+
+1 Oros
+2 Copas
+3 Diamantes
+4 Bastos
+
+```{r}
+naipes <- paste(rep(c("A", 2:10, "J", "Q", "k"), 4), 
+                c("OROS", "COPAS", "DIAMANTES", "BASTOS"))
+naipes
+```
+
+Crear una muestra de cartas
+
+```{r}
+n = 9
+
+#Si se permite repeticion
+cartas <- sample(naipes, n)
+cartas
+
+```
+
+## Caso 5: elementos
+
+Generar una muestra aleatoria de 120 elementos con los números del 1 al 6
+Las probbilidades de 
+
+0.5, 0.25, 0.15, 0.04, 0.03, 0.003
+
+```{r}
+v <- 1:6
+n = 120
+muesta <- sample(v, n, replace = T, c(0.5, 0.25, 0.15, 0.04, 0.03, 0.003))
+muestra
+
+```
+
+Esta muestra no es aleatoria porque hace falta elementos para poderse llamar aleatoria ya que:
+
+0.5 + 0.25 + 0.15 + 0.04 + 0.03 + 0.003 = 0.973
+
+
+Ejercicio
+
+Cree una función que reciba los números de 1 a 500 inclusive la función retornará el espacio formado por los números divisibles entre 7. Luego deberá extraer una muestra aleatoria de estos números con remplazo.
+
+v, 12, replace = T
+
+```{r}
+num_div_7 <- function() {
+  numeros <- 1:500
+  divisibles <- numeros[numeros %% 7 == 0]
+  return(divisibles)
+}
+
+
+divisibles_7 <- num_div_7()
+divisibles_7
+
+# Se selecciona una muestra: 
+
+n = 12 
+muestra <- sample(divisibles_7, n, replace = T)
+muestra
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
