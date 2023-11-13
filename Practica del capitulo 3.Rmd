@@ -1,0 +1,314 @@
+---
+title: "Práctica del Capitulo 3 Completa"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-11-13"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Fundamentos para la investigación
+
+## Aleatoriedad y estrategias de muestreo
+
+La función *sample* permite obtener un número dentro de un conjunto de números. Usando la función sample, podemos obtener un número del 1 al 6, tal y como sucede con el número de puntos en un dato.
+
+```{r}
+sample(c(1,2,3,4,5,6),1)
+```
+
+Ejemplo, si se tiene un dado y cada lado esta enumerado del 1 al 6, encontar el resultado de efectuar el lanzamiento muchas veces
+
+```{r}
+dados <- sample(c(1,2,3,4,5,6),1000000, replace=TRUE)
+table(dados)
+```
+
+Se puede observar en el resultado anterior que los resultados son aproximadamete iguales. La probabilidad es la frecuencia relativa de un evento en el largo plazo.
+
+### *Experimento*
+
+Si se lanza una moneda hay una probabilidad de 0.5 de obtener cara o cuz, pero ¿Qué sucede si le lanza muchas veces? (Por ejemplo, 1,000,000 de veces)
+
+```{r}
+moneda <- sample(c("Cara", "Cruz"), 1000000, replace=TRUE)
+table(moneda)
+```
+
+Se puede observar que el resultado de eso es aproximadamente igual para ambos opciones.
+
+La *Ley de los grandes números* (LGN) indica que cuando observamos todos los resultados de una gran cantidad de pruebas, los resultados convergen a un valor esperado, incluso cuando los resultados individuales son aleatorios.
+
+## Muestreo aleatorio simple
+
+En este tipo de muestreo cada individuo o elemento de la población tiene la misma probabilidad de ser elegido parte de la muestra.
+
+*Base de datos* que contiene información de los hoagres en México.
+
+```{r}
+library(readr)
+
+hogares <- read_csv("C:/Users/MINEDUCYT/Downloads/Lic Aquino desde Noviembre/Cuadernos de Trabajo y Manuales/Cap3. Fundamentos para la Investigación/hogares_enigh.csv")
+head(hogares)
+```
+
+Seleccionar de manera aleatoria 10 viviendas.
+
+```{r}
+sample(hogares$folioviv,10)
+```
+
+## Muestreo sistemático
+
+Este muestreo consiste en establecer un punto de inicio o elemento de inicio y elegir para la muestra cada n-ésimo elemento. Este tipo de muestreo es útil si el orden de los elementos de la población es aleatorio.
+
+### *Experimento*
+
+Considera que tenemos un listado del 1 al 100 donde cada número identifica a una vivienda viviendas y que es de nuestro interés seleccionar a 20 de ellas, usando un muestreo sistemático.
+
+El código que se usa viene del repositorio en Github siguiente:
+
+*library(devtools)*
+
+*install_github("DFJL/SamplingUtil")*
+
+Se selecciona aun elemento de cada grupo de 10 mil:
+
+*library(SamplingUtil)*
+
+*N \<- nrow(hogares)*
+
+*sys.sample(N,n=10)*
+
+Pero en este paquete lo que usan es la siguiente función:
+
+```{r}
+sys.sample <- function(N,n){
+  k <- floor(N/n) 
+  r <- sample(1:k, 1)
+  sys.samp <- seq(r, r + k*(n-1), k)
+  return(sys.samp)
+}
+```
+
+Ahora se puede seleccionar aun elemento de cada grupo de 10 mil:
+
+```{r}
+N <- nrow(hogares)
+sys.sample(N,n=10)
+```
+
+Estos nos indica el número de línea que se encuentra la vivienda. Ahora cruzamos esa información con el identificador de la vivienda
+
+```{r}
+hogares$folioviv[sys.sample(N,n=10)]
+```
+
+Comparemos ambos muestreos usando 100 viviendas con un identificador que va del 1 al 100
+
+```{r}
+vivienda <- seq(1:100)
+sample(vivienda, 10)
+```
+
+```{r}
+sys.sample(100,10)
+```
+
+Observa que ahora este muestreo nos indica que debemos considerar en la muestra una vivienda de cada 10 grupos.
+
+## Muestreo estratificado
+
+La población se divide en grupos y basado en esos grupos (también se les llama clases o estratos) de interés, de manera que cada elemento de la población solo se encuentra en un solo grupo, de modo que los elementos dentro de cada grupo comparten las mismas características. Una vez realizado los grupos, se realiza un muestreo aleatorio simple de cada grupo.
+
+### *Experimento*
+
+consideremos que de los 100 hogares necesitamos que 5 sean hombre y 5 mujeres. Por lo que dividamos los hogares en grupos (clases o estratos) por este característica y luego seleccionamos cinco hogares de forma simple de cada grupo.
+
+```{r}
+hombres <- subset(hogares, sexo_jefe==1)
+sample(hombres$folioviv,5)
+```
+
+```{r}
+mujeres<- subset(hogares, sexo_jefe==2)
+sample(mujeres$folioviv,5)
+```
+
+# *Correlación no implica causalidad*
+
+# Preguntas de investigación y métodos
+
+Preguntas que pueden ser contestadas utilizando las siguientes pruebas:
+
+-   *Prueba t de una media:* Comparar la media de una variable contra un valor especifico. Por ejemplo: ¿La temperatura corporal de los estudiantes universitarios es mayor al valor esperado de 37° centígrados que tienen los individuos sanos?
+
+-   *Prueba t de dos medias:* Comparar la media de una variable que se recolecta de dos grupos (o dos muestras). Por ejemplo: ¿Los hombres tienen mayor promedio de horas de estudio que las mujeres?
+
+-   *Análisis de varianza:* Probar la igualdad de tres o más promedios. Por ejemplo: ¿Es el promedio de puntuaciones IQ igual entre niños con nivel de plomo alto, medio y bajo?
+
+-   *Prueba para una proporción:* La prueba de de hipótesis para una proporción ˆp, es semejante al procedimiento de la prueba t para una media. La prueba se basa en la diferencia entre la proporción muestral ˆp y la proporción hipotética p0. ¿Es la proporción de trabajadores sindicales mayor a 50% en México?
+
+-   *Prueba para dos proporciones:* Al igual que la prueba de t de dos medias, una prueba de proporción también se puede realizar para dos muestras.
+
+-   *Prueba de independencia:* las frecuencias de dos variables categóricas y se busca determinar si las frecuencias están distribuidas de manera equitativa entre las diferentes combinaciones de las variables. Si no están los valores distribuidos de manera equitativa entonces existe una relación o una preferencia entre las variables. Esta prueba solo nos informa si existe independencia o no.
+
+Por ejemplo: ¿Existe alguna relación entre el tipo de vuelo (nacional o internacional) y tipo de boleto (turista, ejecutivo) de los viajeros?
+
+-   *Regresión lineal:* determinar si existe una relación lineal entre dos variables cuantitativas, se utiliza una ecuación que indica cuál es la relación entre ellas.Por ejemplo: ¿Puede la estatura utilizarse para predecir el peso de los adultos? o ¿Existe una relación lineal entre el costo de la vivienda y la distancia al metro?
+
+-   *Prueba para igualdad de varianzas:* En otro capitulo
+
+# Simulación
+
+Como se comporta el la distribución muestral de una variable a través de simulaciones. Primero debemos crear de manera aleatoria una distribución exponencial con media igual 1/3. El siguiente código genera una tabla de datos que tiene 10,000 muestras, cada una de tamaño 10.
+
+```{r}
+library(dplyr)
+library(tidyverse)
+```
+
+```{r}
+n <- 10 # Número de observaciones en cada muestra
+r <- 10000 # Número de replicas / número de muestras a recolectar
+muestras <- matrix(rexp(n*r,3),r)
+muestras.df <- data.frame(t(muestras))
+```
+
+Calculamos la media de cada muestra, y además la media de la población, que es el promedio de todas las medias muestrales:
+
+```{r}
+media <- data.frame(X1=apply(muestras.df,2,mean))
+media_poblacional <- mean(media$X1)
+```
+
+Gráficamos la distribución de solo una muestra, $X1$ por ejemplo:
+
+```{r}
+label.left <- paste0("Media de 1 \n muestra: ",round(media$X1[1],3))
+grafica1 <- muestras.df %>%
+  ggplot() +
+  geom_histogram(aes(x=X1),bins=10) +
+  annotate("text", x=0.6 , y=2.75 , label=label.left)
+grafica1
+```
+
+Ahora gráfiquemos la distribución de todos los promedios de las 10,000 muestras seleccionadas:
+
+```{r}
+label.right <- paste0("Media de las \n distribución \n muestral \n con", r, "muestras \n de tamaño \n 10 cada una:0.332")
+grafica2 <- media %>%
+  ggplot() + geom_histogram(aes(x=X1)) +
+  annotate("text",x=0.7, y=900, label=label.right)
+grafica2
+```
+
+
+Comparemos ambas gráficas:
+
+```{r}
+cowplot::plot_grid(grafica1,grafica2)
+```
+
+La gráfica de la izquierda solo muestra la distribución de una sola muestra de las 10,000 generadas, la muestra solo es de tamaño 10, la gráfica muestra solo la distribución de la muestra. En cambio, la gráfica de la derecha muestra la distribución muestral de la media x, es decir, la distribución de las 10000 medias generadas a partir de las 10000 muestras, la distribución muestral parece una normal, pero veamos que sucede si aumentamos el tamaño de la muestra.
+
+Anteriormente usamos una muestra de tamaño, ahora realicemos el mismo ejercicio pero usando una muestra de tamaño 200, es decir cada una de las 10,000 muestras tendra 200 elementos:
+
+```{r}
+n <- 200 # Número de observaciones en cada muestra
+r <- 10000 # Número de replicas / número de muestras a recolectar
+muestras <- matrix(rexp(n*r,3),r)
+muestras.df <- data.frame(t(muestras))
+media <- data.frame(X1=apply(muestras.df,2,mean))
+media_poblacional <- mean(media$X1)
+label.left <- paste0("Media de 1 \n muestra: ",round(media$X1[1],3))
+grafica1 <- muestras.df %>%
+ggplot() +
+geom_histogram(aes(x=X1),bins=10) +
+annotate("text", x=1.2 , y=40 , label=label.left)
+label.right <- paste0("Media de las \n distribución \n muestral \n con 10000 muestras \n de tamaño \n 200 cada una:0.333")
+grafica2 <- media %>%
+  ggplot() +
+  geom_histogram(aes(x=X1)) +
+  scale_x_continuous(limits = c(0.2,0.6)) + xlab("medias") +
+  annotate("text",x=0.5, y=1500, label=label.right)
+
+cowplot::plot_grid(grafica1,grafica2)
+```
+
+La distribución de la muestra de la gráfica izquierda, ahora sí parece más una distribución exponencial que cuando solo se tenia una muestra de 10 elementos. Ahora, la gráfica de la muestra, que reporta al igual que el caso anterior, 10,000 promedios pero ahora cada promedio se obtuvo de una muestra de tamaño 200 en vez 10, la distribución muestral se ve más simetrica que la anterior, y nos da una idea del verdadero valor de la media poblacional, al ser un ejercicio simulado sabemos que la verdadera media es 1/3, o 0.3333, podemos verificar que de hecho el promedio de las medias muestras es 0.3336.
+
+
+# Otras distribuciones
+
+El teorema del limite central menciona que no importa la distribución que tenga la variable, la distribución muestral será normal siempre y cuando el tamaño de la muestra sea grande.
+Veamos un ejemplo sobre otros estadísticos como la suma o la varianza del ejemplo anterior
+
+```{r}
+suma <- data.frame(X1=apply(muestras.df,2,sum))
+varianza <- data.frame(X1=apply(muestras.df,2,var))
+
+g1 <- muestras.df %>%
+  ggplot()+
+  geom_histogram(aes(x=X1),bins=10) +
+  ggtitle("Distribución de una muestra")+theme_light()
+
+g2 <- suma %>%
+  ggplot()+
+  geom_histogram(aes(x=X1),bins=10)+
+  xlab("Suma de la muestra")+
+  ggtitle("Distribución muestral de la suma")+theme_light()
+
+g3 <- media %>%
+  ggplot()+
+  geom_histogram(aes(x=X1),bins=10)+
+  xlab("Media de la muestra")+
+  ggtitle("Distribución muestral de la media")+theme_light()
+
+g4 <- varianza %>%
+  ggplot()+
+  geom_histogram(aes(x=X1),bins=10)+
+  xlab("Varianza de la muestra")+
+  ggtitle("Distribución muestral de la varianza")+theme_light()
+
+cowplot::plot_grid(g1,g2,g3,g4)
+```
+
+Podemos replicar este ejercicio para otras distribuciones, para ello y facilitar la comprensión del teorema del límite central, podemos construir una función que genere la distribución muestral de la media, suma y varianza de una variable aleatoria que tiene diferentes distribuciónes. Las distribuciones que puede tomar la variable son: Exponencial (E), normal (N), uniforme (U), Poisson (P), binomial (B), gamma (G), Chi-cuadrada (X) y t de Student (T). Algunas distribuciones requieren de dos parámetros para dar el comportamiento deseado a la variable, por ejemplo, en la distribución normal podemos asignar la media y la desviación estándar.
+
+```{r}
+dms <- function(n,distribucion=NULL,param1=NULL,param2=NULL){
+  r <- 10000
+  muestras <- switch(distribucion, 
+                     "E"=matrix(rexp(n*r,param1),r),
+                     "N"=matrix(rnorm(n*r,param1,param2),r),
+                     "U"=matrix(runif(n*r,param1,param2),r),
+                     "P"=matrix(rpois(n*r,param1),r),
+                     "B"=matrix(rbinom(n*r,param1,param2),r),
+                     "G"=matrix(rgamma(n*r,param1,param2),r),
+                     "X"=matrix(rchisq(n*r,param1),r),
+                     "T"=matrix(rt(n*r,param1),r))
+  sumas <- apply(muestras,1,sum)
+  medias <- apply(muestras,1,mean)
+  varianzas <- apply(muestras,1,var)
+  par(mfrow=c(2,2))
+  hist(muestras[1,],col="gray",main="Distribución de una muestra")
+  hist(sumas,col="gray",main="Distribución muestral de la suma")
+  hist(medias,col="gray",main="Distribución muestral de la media")
+  hist(varianzas,col="gray",main="Distribución muestral de la varianza")
+}
+#Realiza los siguientes ejemplos y ve lo que sucede:
+dms(10,"E",5)
+```
+
+
+```{r}
+dms(50,"X",14)
+```
+
+
+
+
+
