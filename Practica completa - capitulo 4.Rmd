@@ -1,0 +1,667 @@
+---
+title: "Práctica Completa del Capítulo 4"
+author: "Jenniffer Beatriz Aleman Castillo"
+date: "2023-11-13"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# *Capítulo 4: Error Estándar e Intervalos de Confianza*
+
+## Intervalo de confianza para la media
+
+Generemos un conjunto de datos y supongamos que el objeto poblacion contiene la edad de todas las personas de un país imaginario que llamaremos ABC.
+La simulación se genera con el comando _runif_ que generara números entre 5 y 90. Se usara el comando _round_, para asegurarnos que serán únicamente números enteros.
+
+```{r}
+poblacion <- round(runif(400000, 5, 90),0)
+```
+
+Obtener muestra tamaño 20 utilizando _sample()_ y se le agregará _replace=FALSE_, para indicar que una vez que se ha seleccionado una persona, no se es posible volver a seleccionarla.
+
+```{r}
+muestra<- sample(poblacion,size=20,replace=FALSE)
+media_mu <- mean(muestra)
+media_mu
+print(paste("La media de la muestra es de: ", media_mu))
+```
+
+Estos resultados se podrían interpretar como que la edad promedio del país ABC es 42.8. Para comprobar este dato se tomará una segunda y tercera muestra y se extraerá una nueva media.
+
+```{r}
+muestra2<- sample(poblacion,size=20,replace=FALSE)
+mean(muestra2)
+```
+
+```{r}
+muestra3<- sample(poblacion,size=20,replace=FALSE)
+mean(muestra3)
+```
+
+Con estos resultados se puede observar que los valores promedio de las tres muestras son diferentes. Ahora se repite este proceso 100 veces y se guada en una variable y se le extraerá una muestra de esto:
+
+```{r}
+n <- 100
+media_muestral <- matrix(0, n,1)
+for (i in 1:n) {
+  media_muestral[i,1]=mean(sample(poblacion,size=20,replace=FALSE))
+}
+```
+
+Una buena aproximación para obtener la media de todas las medias muestrales sería:
+
+```{r}
+mean(media_muestral)
+```
+
+Comparar esta ultima media con la media real de la población:
+
+```{r}
+mean(poblacion)
+```
+
+Se puede observar que los valores son más sercanos entre sí. Además, para obtener esta media se puede proponer un *intervalo de confianza*. Un intervalo de confianza es un rango de valores sobre los cuales esperamos encontrar, en este caso la media de la población.
+
+Para elaborar un intervalo de confianza es necesario determinar la distribución de probabilidad de la media muestral. Un *histograma puede ayudar a dar una idea de la distribución.
+
+```{r}
+hist(media_muestral, main="Histograma de la media muestral", n=30)
+```
+
+
+## *Caso 1:* Si NO conocemos la varianza o desviación estándar de la población
+
+Cuando la desviación estándar de la población (es decir la real) no es conocida la mejor forma de aproximarla es usar la desviación estándar de la muestra s.
+
+*Ejemplo:* Para un nivel de confianza del 90% se tiene (.9+(1-.9)/2=.95) con una muestra de tamaño 20, tenemos (20-1)=19 grados de libertad
+
+```{r}
+qt(0.95, df=19)
+```
+
+*Ejemplo:* Para un nivel de confianza del 95% con una muestra de tamaño 20, tenemos:
+
+```{r}
+qt(0.975, df=19)
+```
+
+- _*Recordando:* La *Prueba t de una media:* Comparar la media de una variable contra un valor especifico._
+
+Para calcular un intervalo de confianza en R usamos el comando *t.test()*. Por ejemplo, usando la *muestra2* tenemos que el intervalo de confianza al 90% para la media de la población es
+
+```{r}
+t.test(muestra2, conf.level =.90)[["conf.int"]]
+```
+
+Si se redondea a dos decimales, se puede concluir que con 95% de confianza la edad media de la población del país _ABC_ cumple 42.14302 <= μ <= 59.95698
+
+## *Caso 2:* Si conocemos la varianza o la desviación estándar de la población
+
+Los valores z se calculan con el comando qnorm, usando un único parámetro, que depende del nivel de confianza en decimales (nc) de acuerdo con la siguiente formula nc + (1 − nc)/2.
+
+Ejemplo: Para un nivel de confianza del 90% (.9+(1-.9)/2=.95)
+```{r}
+qnorm(0.95)
+```
+
+Para realizar el intervalo de confianza es necesario conocer los siguientes parametros:
+- _y_ la muestra
+- _sigma_ representando la desviación estándar de la población (raíz de la varianza)
+- _nc_ de acuerdo con el nivel de confianza
+
+
+## *Función para determinar este intervalo de confianza*
+
+```{r}
+ic_media_var_pob <- function(y, sigma, nc, variable)
+{
+  z <- qnorm(nc+(1-nc)/2)
+  n <- length(y)
+  i_sup <- mean(y)+z*sigma/sqrt(n)
+  i_inf <- mean(y)-z*sigma/sqrt(n)
+  texto <- sprintf("Estamos %s%% seguros que el promedio de %s está entre %.2f y %.2f.", (nc*100), variable, i_inf, i_sup)
+  return(list(texto))
+}
+```
+
+_*Ejemplo:*_ Definamos una variable sigma= 24.55
+
+```{r}
+sigma= 24.55
+ic_media_var_pob(muestra2,sigma,.95,"edad")
+```
+
+# *Intervalo de confianza para las diferencias de medias*
+
+comparar las medias de dos muestras distintas. Una forma de hacerlo es efectuar un intervalo de confianza para las diferencias de esas medias.
+
+```{r}
+library(readxl)
+enoe <- read_excel("D:/Beatriz/Lic Aquino desde Noviembre/Cuadernos de Trabajo y Manuales/Cap4. Error Estándar e Intervalos de Confianza/enoe.xlsx")
+head(enoe)
+```
+
+Estos datos contienen el ingreso mensual reportado en la Encuesta Nacional de Empleo en México.
+
+- Determinar un intervalo de confianza para la diferencia de las medias del salario que ganan los hombres y el que ganan las mujeres.
+
+*La forma del intervalo dependerá si conocemos o no la desviación estándar de la población.*
+
+## *Caso 1:* Si NO se conoce la varianza o desviación estándar de las poblaciones
+
+Cuando no conocemos la varianza de la población debemos considerar que pueden existir dos opciones: 
+
+- que la varianza de las dos muestras se la misma *o* 
+- que la varianza de las dos muestras diferente. 
+
+La mayoría de los casos caemos en alguno de estos supuestos.
+
+Ejemplo:
+
+```{r}
+library(dplyr)
+hombres <- subset(enoe, sex=="Hombre")
+hombres<-hombres$ingreso_mensual
+mujeres <- subset(enoe, sex=="Mujer")
+mujeres <- mujeres$ingreso_mensual
+```
+
+
+### Caso 1.1: Las dos muestras tienen igual varianza
+
+### Caso 1.2: Las muestras tienen diferente varianza
+
+Obtener el intervalo de confianza cuando no conocemos la varianza de la población.
+
+```{r}
+ic_dosmedias_nvp <- function(x,y,var_ig, nc, variable)
+{
+  t <- t.test(x, y, var.equal = var_ig, conf.level = nc)[["conf.int"]]
+  i_inf <- t[1]
+  i_sup <- t[2]
+  texto <- sprintf("Estamos %s%% seguros que la diferencia del %s promedio entre ambas muestras está entre %.2f y %.2f.", (nc*100), variable, i_inf, i_sup)
+  resumen <- sprintf("%s%% IC: %.2f a %.2f", (nc*100), i_inf, i_sup)
+  return(list(texto, resumen))
+}
+```
+
+
+- *Si la varianza entre ambas muestras es la misma usamos* _*var_ig=TRUE*_
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=TRUE, nc=.95, variable="salario")[[1]]
+```
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=TRUE, nc=.95, variable="salario")[[2]]
+```
+
+- *Si la varianza entre ambas muestras es diferente usamos* _*var_ig=FALSE*_
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=FALSE, nc=.95, variable="salario")[[1]]
+```
+
+```{r}
+ic_dosmedias_nvp (x=hombres, y=mujeres, var_ig=FALSE, nc=.95, variable="salario")[[2]]
+```
+
+En los ejemplos que hemos realizado hemos usado el mismo conjunto de datos para estimar el intervalo de confianza para la diferencia entre los salarios de los hombres y el salario de las mujeres, bajo los supuestos que la varianza de ambas muestras es igual, pero también suponiendo que no lo son.
+
+Estrictamente en una investigación real, *debemos analizar primero como son las varianzas de las muestras*. En la práctica será mucho más común que las varianzas sean diferentes, sin embargo es necesario establecer que puede darse el caso en que son iguales.
+
+
+```{r}
+var(hombres)
+var(mujeres)
+```
+
+
+## *Caso 2:* Si se conoce la varianza o desviación estándar de la población
+
+En algunos casos es posible que conozcamos la varianza de población, por lo tanto es posible estimar la varianza de las muestras de las cuales deseamos un intervalo de confianza para su diferencia.
+
+*La estimación dependerá si la varianza de las muestras es la misma o es diferente.* Supongamos que de alguna manera sabemos que la varianza de la población de la cual provienen las muestras sobre los salarios de hombres es de 48654016 y la de las mujeres es de 16974669. Usaremos estos datos para obtener un mejor intervalo de confianza.
+
+### Caso 2.1: Las dos muestran tienen la misma varianza
+
+### Caso 2.2 Las muestras tienen diferente varianza
+
+De manera directa establezcamos una función que permita efectuar el intervalo de confianza para cualquiera de las opciones del caso 2.
+
+```{r}
+ic_dosmedias_svp <- function(y1, y2,nc,var_ig, sigma1, sigma2, variable)
+{ 
+  z <- qnorm(nc+(1-nc)/2) 
+  n1<-length(y1)
+  n2<-length(y2)
+  if(var_ig==TRUE){
+    i_sup <- (mean(y1)-mean(y2))+z*sigma1*sqrt(1/n1+1/n2)
+    i_inf <- (mean(y1)-mean(y2))-z*sigma1*sqrt(1/n1+1/n2)
+    resumen <- sprintf("%s%% IC: %.2f a %.2f", (nc*100), i_inf, i_sup)
+    texto <- sprintf("Estamos %s%% seguros que la diferencia del %s promedio entre ambas muestras está entre %.2f y %.2f.", (nc*100),variable, i_inf, i_sup, variable)
+    return(list(texto, resumen))
+    }
+  if(var_ig==FALSE){
+    i_sup <- (mean(y1)-mean(y2))+z*sqrt(sigma1^2/n1+sigma2^2/n2)
+    i_inf <- (mean(y1)-mean(y2))-z*sqrt(sigma1^2/n1+sigma2^2/n2)
+    resumen <- sprintf("%s%% IC: %.2f a %.2f", (nc*100), i_inf, i_sup)
+    texto <- sprintf("Estamos %s%% seguros que la diferencia del %s promedio entre ambas muestras está entre %.2f y %.2f.", (nc*100),variable, i_inf, i_sup)
+    return(list(texto, resumen))
+  }
+}
+```
+
+```{r}
+sigma1 <- sqrt(48654016)
+sigma1
+sigma2 <- sqrt(16974669)
+sigma2
+```
+
+- *Si la varianza de las dos muestras es la misma tenemos:*
+
+```{r}
+ic_dosmedias_svp(y1=hombres, y2=mujeres, nc=.95, var_ig=TRUE, 
+                 sigma1=sigma1, 
+                 sigma2 = sigma2, 
+                 variable = "salario")[[1]]
+```
+
+```{r}
+ic_dosmedias_svp(y1=hombres, y2=mujeres, nc=.95, var_ig=TRUE, sigma1=sigma1,
+                 sigma2 = sigma2,
+                 variable = "salario")[[2]]
+```
+
+- *Si la varianza de las dos muestras es diferente*
+
+```{r}
+ic_dosmedias_svp(y1=hombres, y2=mujeres, nc=.95, var_ig=FALSE, sigma1=sigma1,
+                 sigma2 = sigma2, 
+                 variable = "salario")[[1]]
+```
+
+```{r}
+ic_dosmedias_svp(y1=hombres, y2=mujeres, nc=.95, var_ig=FALSE, sigma1=sigma1,
+                 sigma2=sigma2, 
+                 variable = "salario")[[2]]
+```
+
+# *Intervalo para la media de muestras pareadas*
+
+Con la información de los resultados de un test que busca medir la autoestima de una persona. Mayor puntaje en el test, mayor autoestima en confianza en sí mismo reporta una persona. El mismo test se aplicó antes y después de tomar una serie de charlas motivacionales. Después del ciclo de charlas algunos estudiantes incrementaron su calificación y algunos otros la disminuyeron.
+
+```{r}
+MA <- c(150, 121, 86, 89, 101, 120, 94, 97, 120, 149, 113, 101, 100, 89, 134)
+MD <- c(170, 127, 78, 81, 110, 128, 91, 92, 180, 168, 118, 117, 119, 88, 145)
+```
+
+La función t.test() nos ayuda nuevamente a efectuar el intervalo de confianza. En este caso debemos incluir la opción ´paired = TRUE´ para indicar que se trata de una muestra pareada.
+
+```{r}
+t.test(MA, MD, paired = TRUE, conf.level = 0.95)[["conf.int"]]
+```
+
+Con los resultados tenemos que -19.2363274 <= miu antes *−* miu despues <= -0.4970059
+
+Por lo tanto, con 95% de confianza podemos decir que la diferencia de la medición de la autoestima entre antes y después de las charlas está entre -19.24 y -0.5 puntos.
+
+Observa que si introducimos de forma intercambiada los datos, tenemos el intervalo de confianza multiplicado por menos uno.
+
+```{r}
+t.test(MD, MA, paired = TRUE, conf.level = 0.95)[["conf.int"]]
+```
+
+En este caso tendríamos 0.4970059 <= miu despues *−* miu antes <= 19.2363274.
+Por lo tanto, con 95% de confianza podemos decir que en promedio las charlas incrementaron la medida de autoestima de los estudiantes entre 0.5 y 19.24 puntos
+
+# *Intervalo para una proporción*
+
+Al construir un intervalo de confianza de una proporción a través de una muestra, obtendremos un rango de valores, el cual creemos que contiene al verdadero valor de la proporción población. Escogemos un nivel de confianza, ya sea del 90%, 95 o 99%, que nos indica qué tan probable es que la verdadera proporción de la población se encuentre dentro de ese intervalo. Como resultado, el intervalo provee mejor información que la estimación puntual de un estadístico.
+
+
+### Datos:
+
+```{r}
+rm(list=ls())
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(PropCIs)
+
+
+enoe <- read_excel("D:/Beatriz/Lic Aquino desde Noviembre/Cuadernos de Trabajo y Manuales/Cap4. Error Estándar e Intervalos de Confianza/enoe.xlsx")
+
+```
+
+Generaremos una nueva variable dicotómica, que sea igual a 1 cuando la persona tenga un nivel educativo igual a “Medio superior y superior”:
+
+```{r}
+enoe <- enoe %>% 
+  mutate(medio_superior = case_when(
+    nivel_edu=="Medio superior y superior" ~ 1,
+    nivel_edu!="Medio superior y superior" ~ 0))
+# Porcentaje de personas con este nivel educativo
+mean(enoe$medio_superior)
+```
+
+## Intervalo de Wald
+
+La construcción del intervalo de Wald es similar al de la media, es decir, se construye a partir de la proporción más/menos un margen de error. ( _No es muy recomendable utilizarlo_ )
+
+Recordemos que los valores z se calculan con el comando qnorm, usando un único parámetro, que depende del nivel de confianza:
+
+- Para un nivel de confianza del 90%, z = 1.645
+- Para un nivel de confianza del 95%, z = 1.96
+- Para un nivel de confianza del 99%, z = 2.58
+
+Para construir el intervalo de Wald, generamos la siguiente función:
+
+```{r}
+waldic <- function(x,n,confianza){
+  z <- qnorm(confianza+(1-confianza)/2)
+  p = x/n
+  se <- sqrt(((1-p)*p)/n)*z
+  li <- p-se
+  ls <- p+se
+  cint <- c(li, ls)
+  rval <- list(proporcion = p,intervalo = cint)
+  return(rval)
+}
+```
+
+La función anterior requiere de entrada un valor x, el cual el indica el número total de casos de éxito, es decir, la suma de todos los valores 1. El valor n indica el tamaño de la muestra. A partir de estos dos valores, la función estima la proporción. También requiere indicar el nivel de confianza en forma de tasa.
+
+Con esta función podemos generar un intervalo con los tres niveles de confianza, observa cómo cambia el rango. Para tener un código que pueda leerse mejor generamos los dos valores que requiere la función:
+
+```{r}
+exito <- sum(enoe$medio_superior)
+n <- length(enoe$medio_superior)
+waldic(exito, n, confianza= 0.90)
+```
+
+```{r}
+waldic(exito, n, confianza= 0.95)
+```
+
+```{r}
+waldic(exito, n, confianza= 0.99)
+```
+
+## Intervalo de Agresti-Coull
+
+El invervalo de Agresti-Coull es una modificación del intervalo de Wald, el cual añade dos observaciones al número de casos de éxito (cuando la variable de interés es igual a 1) y 2 observaciones al número de casos de fracaso (cuando la variable de interés es igual a 0) de modo que el total de observaciones aumentó en cuatro.
+Con esta simple modificación el intervalo mejora su probabilidad de cobertura. También se le conoce como el método más cuatro.
+
+La función que utilizaremos se llama add4ci. Esta función requiere de tres valores, el total de casos de éxito, el tamaño de la muestra y el nivel de confianza.
+
+Para estimar los intervalos de confianza con los tres niveles:
+
+```{r}
+add4ci(exito, n,conf.level = 0.90)
+```
+```{r}
+add4ci(exito, n,conf.level = 0.95)
+```
+```{r}
+add4ci(exito, n,conf.level = 0.99)
+```
+
+## Intervalo de Wilson
+
+El intervalo de Wilson o intervalo de confianza de la puntuación de Wilson, tiene buena probabilidad de cobertura y se recomienda usar cuando la muestra es pequeña o la proporción muestral es cercana a 0 o 1.
+
+El comando que utilizaremos se llama scoreci, el cual también forma parte de la paqueteria PropCIs.
+
+Para calcular este intervalo con los tres niveles de confianza:
+
+```{r}
+scoreci(exito, n,conf.level = 0.90)
+```
+
+```{r}
+scoreci(exito, n,conf.level = 0.95)
+```
+```{r}
+scoreci(exito, n,conf.level = 0.99)
+```
+
+## Intervalo de Clopper-Pearson
+
+Es un método “exacto” en el sentido de utiliza la distribución binomial exacta en lugar de una aproximación de una distribución. Cuando se elige un nivel de confianza, la probabilidad de cobertura suele ser mayor a este. La estimación del intervalo es complicada, sin embargo, dependeremos del software para estimar este intervalo.
+
+Utilizando la función exactci de la paqueteria PropCIs, la sintaxis es similar al resto de las funciones:
+
+```{r}
+exactci(exito, n,conf.level = 0.90)
+```
+
+Para comparar los diferentes métodos de un intervalo, observa cómo cambian para esta proporción:
+
+```{r}
+print("Wald")
+waldic(exito, n, confianza= 0.95)
+```
+
+```{r}
+print("A-C")
+add4ci(exito, n,conf.level = 0.95)
+```
+
+```{r}
+print("Wilson")
+scoreci(exito, n,conf.level = 0.95)
+```
+```{r}
+print("Exacto")
+exactci(exito, n,conf.level = 0.95)
+```
+
+# Intervalo para dos proporciones
+
+## Método de Wald
+
+```{r}
+mujer <- enoe %>%
+filter(sex=="Mujer")
+hombre <- enoe %>%
+filter(sex=="Hombre")
+# porcentaje de personas con educación media superior y superior
+mean(mujer$medio_superior)
+```
+```{r}
+mean(hombre$medio_superior)
+```
+```{r}
+# Diferencia entre porcentajes (Mujer-Hombre)
+mean(mujer$medio_superior)-mean(hombre$medio_superior)
+```
+
+Necesitamos especificar la opción “correct” con el valor “FALSE”, ya que de manera predeterminada la función estima el intervalo con corrección por continuidad. Si queremos estimar el método tradicional del Wald, es necesario desactivar esta opción:
+
+```{r}
+# Total de casos de éxito para cada grupo
+exito_mh <- c(sum(mujer$medio_superior),sum(hombre$medio_superior))
+# Total de observaciones en cada grupo
+n_mh <- c(length(mujer$medio_superior),length(hombre$medio_superior))
+prop.test(exito_mh,n_mh,correct = FALSE, conf.level = .95)
+```
+
+### Método de Wald con corrección por continuidad (Mejorado)
+
+Para mejorar el método de Wald, se puede hacer una corrección por continuidad, es un ajuste que se realiza cuando se usa una distribución normal continua para aproximar una distribución binomial discreta.
+
+```{r}
+prop.test(exito_mh,n_mh,correct = TRUE, conf.level = .95)
+```
+
+Tabla de datos con total de casos de éxito, el tamaño del grupo, el total de fracasos y una variable categórica que indica a que grupo pertenecen estos valores.
+
+```{r}
+enoe_grupo <- enoe %>%
+  mutate(total=1) %>% 
+  group_by(sex) %>%
+  summarise(medio_superior = sum(medio_superior), n=sum(total)) %>%
+  mutate(fracaso=n-medio_superior)
+```
+
+```{r}
+enoe_grupo
+```
+
+Para calcular el intervalo se utiliza la siguiente sintaxis:
+
+```{r}
+library(pairwiseCI)
+```
+
+```{r}
+pairwiseCI(cbind(medio_superior, fracaso) ~ sex, data=enoe_grupo,conf.level = 0.95, method = "Prop.diff", CImethod="CC")
+```
+
+*Nota:* Ambas funciones llegan a mismo resultado
+
+# *Agresti-Caffo*
+
+El método de Agresti-Caffo es una modificación al método de Wald, el cuál mejora la probabilidad de cobertura del intervalo incluso cuando el tamaño de la muestra es bajo o las proporciones estan cerca de los limites 0,1.
+
+Este método consiste en recalcular las proporciones de ambos grupos añadiendo un caso de éxito a cada uno y dos observaciones al tamaño de cada grupo, idea similar al método de Agresti-Coull de una proporción. Con estos cambios, el intervalo mejora su probabilidad de cobertura.
+
+```{r}
+library(PropCIs)
+wald2ci(exito_mh[1],n_mh[1],exito_mh[2],n_mh[2], conf.level = 0.95, adjust=TRUE)
+```
+```{r}
+pairwiseCI(cbind(medio_superior, fracaso) ~ sex, data=enoe_grupo, conf.level = 0.95, method = "Prop.diff", CImethod="AC")
+```
+
+# *Newcombe*
+
+Este método es ampliamente recomendado, excepto cuando se tiene muestras pequeñas. Para calcular este intervalo usamos la función pairwiseCI con la misma sintaxis de los ejemplos anterior, cambiando la opción del método CImethod por “NHS” que se refiere al método de Newcombe.
+
+```{r}
+pairwiseCI(cbind(medio_superior, fracaso) ~ sex, data=enoe_grupo, conf.level = 0.95, method = "Prop.diff", CImethod="NHS")
+```
+
+
+# *Intervalo para una Varianza*
+
+### Datos: enoe
+
+Usando el mismo extracto de la muestra ENOE, construyamos un intervalo de confianza para la varianza del ingreso mensual. Los cálculos son sencillos de realizar sin utilizar ninguna función específica:
+
+```{r}
+# Varianza del ingreso
+varianza <- var(enoe$ingreso_mensual)
+# Chi menor
+chi_menor <- qchisq(0.025,df=(length(enoe$ingreso_mensual)-1))
+# Chi mayor
+chi_mayor <- qchisq(0.995,df=(length(enoe$ingreso_mensual)-1))
+# limite inferior
+li <- ((length(enoe$ingreso_mensual)-1)*varianza)/chi_mayor
+# limite superior
+ls <- ((length(enoe$ingreso_mensual)-1)*varianza)/chi_menor
+limites <- c(li, ls)
+intervalo_varianza <- list(varianza = varianza,intervalo = limites)
+intervalo_varianza
+```
+
+# *Intervalo para dos Varianzas*
+
+### Datos: Enoe
+
+Con los sobre ingresos de los trabajadores de la encuesta ENOE, podemos construir un intervalo de confianza para el
+
+```{r}
+var_mujer <- enoe %>% 
+  filter(sex=="Mujer") %>%
+  mutate(total=1) %>%
+  summarise(var=var(ingreso_mensual), n=sum(total))
+var_hombre<- enoe %>%
+  filter(sex=="Hombre") %>%
+  mutate(total=1) %>%
+  summarise(var=var(ingreso_mensual), n=sum(total))
+F_menor <- qf(0.025,df1=var_mujer$n-1,df2=var_hombre$n-1)
+F_mayor <- qf(0.975,df1=var_mujer$n-1,df2=var_hombre$n-1)
+limites <- c((var_mujer$var/var_hombre$var)*F_menor, (var_mujer$var/var_hombre$var)*F_mayor)
+intervalo_varianza <- list(cociente = var_mujer$var/var_hombre$var,intervalo = limites)
+intervalo_varianza
+```
+
+No incluye el valor de 1 cuando la primera variana es igual a la segunda varianza, podemos concluir que existe evidencia suficiente para decir que la variación en el ingreso de hombres y mujeres es diferente, pues tenemos una confianza del 95% de que el intervalo 0.63 - 0.71 realmente contiene el valor verdadero del cociente de las varianzas.
+
+# * Intervalo para una regresión lineal*
+
+## Intervalo de confianza de la pendiente
+
+Para calcular un intervalo de confianza de la pendiente es necesario conocer la distribución muestral de este, es decir, toda la colección de posibles resultados que se obtendrían que tomar muchas muestras y estimamos una regresión lineal. Para cada estimación tendremos un coeficiente de la pendiente. Todos los posibles coeficientes dibujan una distribución normal, en cuyo centro se encuentra el verdadero valor la pendiente, y a la cuál podemos calcular la desviación estándar.
+
+La desviación estándar de la pendiente de la regresión se refiere al error estándar, nos indica cuánto se dispersa el promedio de estos coeficientes de una distribución muestral, el error estándar es una característica de las distribuciones muestrales, no de la población.
+
+## Intervalo de confianza del intercepto
+
+Cuando se estima el intervalo de confianza del intercepto se utiliza la misma idea que para una pendiente, el estimador puntal más menos un margen de error.
+
+## Datos
+
+Usando datos del Banco Mundial para un grupo de países del continente Americano, analizaremos cual es la relación lineal que existe entre el PIB per cápita y la esperanza de vida.
+
+Para evitar una gran dispersión entre los datos, analizaremos la relación lineal entre el logaritmo natural de la esperanza de vida como variable dependiente y el logaritmo natural del PIB per cápita como variable independiente.
+
+```{r}
+rm(list=ls())
+data <- read_csv("D:/Beatriz/Lic Aquino desde Noviembre/Cuadernos de Trabajo y Manuales/Cap4. Error Estándar e Intervalos de Confianza/indicadores_banco_mudial.csv")
+
+data <- data %>% 
+  mutate(lnpib=log(pib_pc),
+         lnesperanza=log(esperanza))
+
+modelo <- lm(lnesperanza ~ lnpib, data=data)
+
+summary(modelo)
+```
+
+*Nota* que en el resumen del modelo, obtenemos el error estándar tanto del intercepto como de la pendiente. Por lo que podemos calcular manualmente los intervalos de confianza, sin embargo podemos ahorrar algunas líneas de código al utilizar la función confit.
+
+```{r}
+confint (modelo, level=0.95)
+```
+
+Con estos intervalos podemos concluir y tener un mejor indicador que los estimados puntuales.
+Con una confianza del 95%, el verdadero valor del intercepto se encuentra en el rango 3.18 - 3.39 y la verdadera pendiente de la regresión lineal se encuentra en el rango 0.098 - 0.122.
+
+*El intervalo de confianza del valor medio de y:* Se refiere a un intervalo del valor medio de las y que corresponden a un valor dado de x.
+
+*El intervalo de predicción:* Se refiere a un rango de valores el cuál esperamos que contenga el valor predicho de un solo valor y en una ecuación de regresión para un solo valor dado de x.
+
+Para poder graficar estos intervalos se puede utilizar la función plot.add.ci que fue elaborada por John Gosink:
+
+```{r}
+plot.add.ci <- function(x, y, interval='prediction', level=0.9, regressionColor='red', ...) {
+  xOrder <- order(x)
+  x <- x[xOrder]
+  y <- y[xOrder]
+  fit <- lm(y ~ x, data=data.frame(x=x, y=y))
+  newX <- data.frame(x=jitter(x))
+  fitPred <- predict.lm(fit,newdata=newX,interval=interval,level=level, ...)
+  abline(lm(y ~ x), col=regressionColor)
+  lines(newX$x, fitPred[,2], lty=2, ...)
+  lines(newX$x, fitPred[,3], lty=2, ...)
+}
+```
+
+La función de manera predeterminada estima el intervalo de predicción, para poder graficar el intervalo de confianza tenemos que cambiar la opción interval. La línea roja indica la recta de regresión, la línea verde el intervalo de predicción y la azul el intervalo de confianza.
+
+```{r}
+plot(data$lnpib,data$lnesperanza, pch=1, main="Intervalo de predicción y confianza")
+# Intervalo de predicción
+plot.add.ci(data$lnpib, data$lnesperanza, col="green", level=0.95, lwd="3")
+# Intervalo de confianza
+plot.add.ci(data$lnpib, data$lnesperanza, col="blue", level=0.95, interval = "confidence", lwd=3)
+```
+
+
+
